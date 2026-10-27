@@ -10,15 +10,15 @@
 4. Clone the fork. In the clone, add the submodule:
 
    ```sh
-   git submodule add https://github.com/simd-labs/zed-simdref.git extensions/simdref
-   git -C extensions/simdref checkout v0.1.0
+   git submodule add https://github.com/simd-labs/zed-simdref.git extensions/simdref-lsp
+   git -C extensions/simdref-lsp checkout v0.1.0
    ```
 
 5. Add the entry to `extensions.toml`, in alphabetical sequence:
 
    ```toml
-   [simdref]
-   submodule = "extensions/simdref"
+   [simdref-lsp]
+   submodule = "extensions/simdref-lsp"
    version = "0.1.0"
    ```
 
@@ -34,11 +34,11 @@ The full instructions: https://zed.dev/docs/extensions/publishing/publishing-gui
 2. In the extensions fork, update the submodule to the new tag:
 
    ```sh
-   git -C extensions/simdref fetch --tags
-   git -C extensions/simdref checkout v0.2.0
+   git -C extensions/simdref-lsp fetch --tags
+   git -C extensions/simdref-lsp checkout v0.2.0
    ```
 
-3. Increase the `version` in the `[simdref]` block of `extensions.toml`.
+3. Increase the `version` in the `[simdref-lsp]` block of `extensions.toml`.
 4. Run `pnpm test`. Commit, push, open a PR.
 
 The update instructions: https://zed.dev/docs/extensions/publishing/updating-and-maintenance

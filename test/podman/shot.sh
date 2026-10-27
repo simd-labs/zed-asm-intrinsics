@@ -49,7 +49,7 @@ podman run --rm -i \
 
 BASE="${OUTHOST%.png}"
 cp "$OUTDIR/shot.png" "$OUTHOST" 2>/dev/null || true
-for n in zed.log sway.log extensions.txt Zed.log workdir.txt home-uv.txt index.json; do
+for n in zed.log sway.log extensions.txt Zed.log workdir.txt home-uv.txt index.json outside.txt; do
   cp "$OUTDIR/$n" "$BASE.$n" 2>/dev/null || true
 done
 for f in "$OUTDIR"/install.*.log; do

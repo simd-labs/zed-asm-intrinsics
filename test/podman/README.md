@@ -32,8 +32,13 @@ The script also copies `OUT.Zed.log` and `OUT.install.simdref.log`, the extensio
 The script prints this line on success and exits with 0:
 
 ```text
-starting language server process. binary path: .../extensions/work/simdref/bin/simdref-lsp
+starting language server process. binary path: .../extensions/work/simdref-lsp/bin/simdref-lsp
+OK: no simdref, uv or python file in $HOME outside the Zed data dir (N other new paths)
 ```
+
+The script fails when a simdref, uv or python file appears in the container `$HOME` outside the Zed data dir. `outside.txt` adjacent to `OUT.png` lists every new path there.
+
+Set `EXT_DIR` to a directory with `extension.toml` and `extension.wasm` to test another build.
 
 ## Screenshot check
 
@@ -43,7 +48,7 @@ starting language server process. binary path: .../extensions/work/simdref/bin/s
 sh test/podman/shot.sh WORKSPACE FILE OUT.png [DEV_EXT_DIR ...]
 ```
 
-`WORKSPACE` and `FILE` are host paths. `FILE` is below `WORKSPACE`. Each `DEV_EXT_DIR` holds `extension.toml` and `extension.wasm`. Its name must be the extension id, `simdref`.
+`WORKSPACE` and `FILE` are host paths. `FILE` is below `WORKSPACE`. Each `DEV_EXT_DIR` holds `extension.toml` and `extension.wasm`. Its name must be the extension id, `simdref-lsp`.
 
 Environment settings:
 

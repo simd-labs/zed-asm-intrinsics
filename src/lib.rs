@@ -166,14 +166,23 @@ fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|b| format!("{b:02x}")).collect()
 }
 
-/// Returns the environment for every command the extension runs. It keeps
-/// every uv write inside the work dir.
+/// Returns the environment for every command the extension runs and for the
+/// server it installed. It keeps every uv and simdref write inside the work
+/// dir: simdref keeps its catalog in the XDG data dir, in `~/Library` on macOS
+/// and in `%LOCALAPPDATA%` on Windows.
 fn work_env(work: &Path) -> Vec<(String, String)> {
+    let home = work.join("home");
     [
         ("UV_TOOL_DIR", work.join("tools")),
         ("UV_TOOL_BIN_DIR", work.join("bin")),
         ("UV_PYTHON_INSTALL_DIR", work.join("python")),
         ("UV_CACHE_DIR", work.join("uv-cache")),
+        ("HOME", home.clone()),
+        ("XDG_CONFIG_HOME", home.join(".config")),
+        ("XDG_DATA_HOME", home.join(".local/share")),
+        ("XDG_STATE_HOME", home.join(".local/state")),
+        ("XDG_CACHE_HOME", home.join(".cache")),
+        ("LOCALAPPDATA", home.join("AppData/Local")),
     ]
     .into_iter()
     .map(|(k, v)| (k.to_string(), v.to_string_lossy().into_owned()))
@@ -294,12 +303,15 @@ impl zed::Extension for Simdref {
         if path_install.is_none() {
             upgrade();
         }
-        let command = match path_install {
-            Some(path) => path,
+        // The installed server gets the work_env of its install, so it reads
+        // the catalog that `isa update` wrote into the work dir.
+        let (command, server_env) = match path_install {
+            Some(path) => (path, vec![]),
             None => match install(id) {
                 Ok(path) => {
                     set_status(id, &Status::None);
-                    path.to_string_lossy().into_owned()
+                    let work = env::current_dir().map_err(|e| e.to_string())?;
+                    (path.to_string_lossy().into_owned(), work_env(&work))
                 }
                 Err(e) => {
                     let msg = format!("{ERR_HINT} Cause: {e}");
@@ -311,7 +323,7 @@ impl zed::Extension for Simdref {
         Ok(zed::Command {
             command,
             args: vec![],
-            env: vec![],
+            env: server_env,
         })
     }
 }
@@ -372,6 +384,19 @@ mod tests {
             uv_path(Os::Windows, &stem, work),
             PathBuf::from("/work/uv/uv.exe")
         );
+    }
+
+    #[test]
+    fn work_env_keeps_every_dir_in_the_work_dir() {
+        let work = Path::new("/work");
+        let vars = work_env(work);
+        // The variables simdref reads to find its data dir on each OS.
+        for key in ["HOME", "XDG_DATA_HOME", "LOCALAPPDATA"] {
+            assert!(vars.iter().any(|(k, _)| k == key), "missing {key}");
+        }
+        for (k, v) in &vars {
+            assert!(Path::new(v).starts_with(work), "{k}={v} is outside {}", work.display());
+        }
     }
 
     #[test]

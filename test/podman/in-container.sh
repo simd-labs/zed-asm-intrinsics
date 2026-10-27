@@ -47,6 +47,7 @@ export WAYLAND_DISPLAY
 wait_sway_socket || { echo "sway socket never appeared"; cat /shot/sway.log; exit 3; }
 
 mkdir -p "$(dirname "$FILE")"
+touch /tmp/zed-start
 /opt/zed.app/libexec/zed-editor --user-data-dir "$UD" "$FILE" >/shot/zed.log 2>&1 &
 ZED_PID=$!
 
@@ -64,4 +65,6 @@ find "$UD/extensions/work" -name install.log -exec sh -c 'cp "$1" "/shot/install
 kill $ZED_PID 2>/dev/null || true
 kill $SWAY_PID 2>/dev/null || true
 wait 2>/dev/null || true
+# Every path in $HOME that changed while Zed ran, outside the Zed data dir.
+find /home/shot -newer /tmp/zed-start ! -path "$UD" ! -path "$UD/*" >/shot/outside.txt 2>&1 || true
 exit $rc
