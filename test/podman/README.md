@@ -55,7 +55,10 @@ For hints, the image must have a new `simdref-lsp` on the `PATH`. The base image
 
 ## Update the screenshots
 
-The `screenshots` branch holds the top-level README screenshots. Replace its single commit and force-push. Do not commit PNG files to `main`.
+To update the screenshots in the main README, replace the single commit at `refs/assets/screenshots`.
+Push it with `--force` to that ref.
+Point the README links at the new commit sha.
+Do not commit PNGs to `main`.
 
 ## Exit status
 

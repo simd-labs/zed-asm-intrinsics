@@ -1,7 +1,7 @@
 # zed-simdref
 
-![simdref inlay hints in a .s file in Zed](https://raw.githubusercontent.com/simd-labs/zed-simdref/screenshots/zed-asm.png)
-![simdref inlay hints in a .cpp file in Zed](https://raw.githubusercontent.com/simd-labs/zed-simdref/screenshots/zed-cpp.png)
+![simdref inlay hints in a .s file in Zed](https://raw.githubusercontent.com/simd-labs/zed-simdref/10bd4108dda9af9356ba802050a88a032f6f806f/zed-asm.png)
+![simdref inlay hints in a .cpp file in Zed](https://raw.githubusercontent.com/simd-labs/zed-simdref/10bd4108dda9af9356ba802050a88a032f6f806f/zed-cpp.png)
 
 A Zed extension that starts `simdref-lsp` for Assembly, C, and C++ buffers. The server shows SIMD instruction text as a one-line brief at the right of each line. Hover on an instruction to show the full simdref page from the local catalog, with no network.
 
