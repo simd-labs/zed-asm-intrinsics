@@ -33,10 +33,12 @@ The script prints this line on success and exits with 0:
 
 ```text
 starting language server process. binary path: .../extensions/work/simdref-lsp/bin/simdref-lsp
-OK: no simdref, uv or python file in $HOME outside the Zed data dir (N other new paths)
+OK: all N new paths in $HOME outside the Zed data dir are on the Zed, mesa, fontconfig and asm-lsp allowlist
+.../extensions/work/simdref-lsp/home/.local/share/simdref
+OK: isa update wrote the catalog dir inside the work dir
 ```
 
-The script fails when a simdref, uv or python file appears in the container `$HOME` outside the Zed data dir. `outside.txt` adjacent to `OUT.png` lists every new path there.
+The script fails when a new path appears in the container `$HOME` outside the Zed data dir and the path is not from Zed, mesa, fontconfig or the `assembly` extension. `outside.txt` adjacent to `OUT.png` lists every new path there.
 
 Set `EXT_DIR` to a directory with `extension.toml` and `extension.wasm` to test another build.
 

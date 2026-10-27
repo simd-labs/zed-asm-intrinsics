@@ -1,7 +1,7 @@
 id = "simdref-lsp"
 name = "simdref"
 description = "SIMD instruction reference as LSP inlay hints for Assembly, C, and C++."
-version = "0.1.0"
+version = "0.1.1"
 schema_version = 1
 authors = ["Marco Barbone <mbarbone@flatironinstitute.org>"]
 license = "GPL-3.0-or-later"

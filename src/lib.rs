@@ -186,6 +186,10 @@ fn work_env(work: &Path) -> Vec<(String, String)> {
     ]
     .into_iter()
     .map(|(k, v)| (k.to_string(), v.to_string_lossy().into_owned()))
+    // A Python that uv downloads gets no Windows registry entry and no
+    // `python` link in a bin dir outside the work dir.
+    .chain([("UV_PYTHON_INSTALL_REGISTRY", "0"), ("UV_PYTHON_INSTALL_BIN", "0")]
+        .map(|(k, v)| (k.to_string(), v.to_string())))
     .collect()
 }
 
@@ -394,8 +398,11 @@ mod tests {
         for key in ["HOME", "XDG_DATA_HOME", "LOCALAPPDATA"] {
             assert!(vars.iter().any(|(k, _)| k == key), "missing {key}");
         }
-        for (k, v) in &vars {
+        for (k, v) in vars.iter().filter(|(_, v)| v != "0") {
             assert!(Path::new(v).starts_with(work), "{k}={v} is outside {}", work.display());
+        }
+        for key in ["UV_PYTHON_INSTALL_REGISTRY", "UV_PYTHON_INSTALL_BIN"] {
+            assert!(vars.iter().any(|(k, v)| k == key && v == "0"), "{key} is not 0");
         }
     }
 

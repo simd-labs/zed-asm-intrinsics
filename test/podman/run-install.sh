@@ -5,8 +5,9 @@
 # simdref", then "isa update". Needs extension.wasm in the repo root:
 #   cargo build --release --target wasm32-wasip2
 #   cp target/wasm32-wasip2/release/zed_simdref.wasm extension.wasm
-# Exit 0 if Zed.log shows the language server starting from the work dir and
-# no simdref, uv or python file appears in $HOME outside the Zed data dir.
+# Exit 0 if Zed.log shows the language server starting from the work dir, the
+# catalog is in the work dir, and every new path in $HOME outside the Zed data
+# dir is on the allowlist below.
 # EXT_DIR (default: the repo root) holds extension.toml and extension.wasm.
 set -eu
 
@@ -31,11 +32,16 @@ sh "$HERE/shot.sh" "$(dirname "$FILE")" "$FILE" "$OUT" "$STAGE/$ID" || true
 
 grep -E "starting language server process.*extensions/work/$ID/bin/simdref-lsp" "${OUT%.png}.Zed.log"
 
-# The extension must write only inside its work dir.
+# The extension must write only inside its work dir. Every other new path in
+# $HOME must come from Zed, mesa, fontconfig or the assembly extension.
 OUTSIDE="${OUT%.png}.outside.txt"
-[ -f "$OUTSIDE" ] || { echo "FAIL: $OUTSIDE missing, the write check did not run" >&2; exit 1; }
-if grep -E 'simdref|/uv|python' "$OUTSIDE"; then
-  echo "FAIL: the files above are outside the extension work dir" >&2
+[ -s "$OUTSIDE" ] || { echo "FAIL: $OUTSIDE missing or empty, the write check did not run" >&2; exit 1; }
+ALLOWED='^/home/shot(/\.cache(/(zed|mesa_shader_cache|fontconfig)(/.*)?)?|/\.config(/asm-lsp(/.*)?)?)?$'
+if grep -vE "$ALLOWED" "$OUTSIDE"; then
+  echo "FAIL: the paths above are new in \$HOME outside the Zed data dir" >&2
   exit 1
 fi
-echo "OK: no simdref, uv or python file in \$HOME outside the Zed data dir ($(wc -l <"$OUTSIDE") other new paths)"
+echo "OK: all $(wc -l <"$OUTSIDE") new paths in \$HOME outside the Zed data dir are on the Zed, mesa, fontconfig and asm-lsp allowlist"
+
+grep -E "extensions/work/$ID/home/\.local/share/simdref$" "${OUT%.png}.workdir.txt"
+echo "OK: isa update wrote the catalog dir inside the work dir"

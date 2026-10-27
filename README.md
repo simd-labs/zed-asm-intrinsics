@@ -25,7 +25,7 @@ The extension upgrades the simdref copy it installed once a day. The daily check
 
 ## Auto-install
 
-The extension looks for `simdref-lsp` on the `PATH` first. If it finds none, it downloads the `uv` release from `astral-sh/uv` and checks it against the `.sha256` file from that release. It then installs simdref and its catalog. All files stay in the extension work directory of Zed.
+The extension looks for `simdref-lsp` on the `PATH` first. If it finds none, it downloads the `uv` release from `astral-sh/uv` and checks it against the `.sha256` file from that release. It then installs simdref and its catalog. The first start downloads the catalog, 589 MB for the data-v0.0.13 release. All files stay in the extension work directory of Zed.
 
 ## Manual install
 
