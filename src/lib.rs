@@ -14,7 +14,7 @@ const ERR_HINT: &str = "simdref not found. Install it: uv tool install simdref (
 /// Pinned uv release. Bump UV_TAG to move to a newer uv.
 const UV_TAG: &str = "0.12.23";
 
-struct Simdref;
+struct AsmIntrinsics;
 
 /// True when a regular file or a symlink exists at `path`. The WASI sandbox
 /// refuses to follow uv's absolute tool shim symlinks outside their parent
@@ -289,9 +289,9 @@ where
     upgrade
 }
 
-impl zed::Extension for Simdref {
+impl zed::Extension for AsmIntrinsics {
     fn new() -> Self {
-        Simdref
+        AsmIntrinsics
     }
 
     fn language_server_command(
@@ -332,7 +332,7 @@ impl zed::Extension for Simdref {
     }
 }
 
-zed::register_extension!(Simdref);
+zed::register_extension!(AsmIntrinsics);
 
 #[cfg(test)]
 mod tests {

@@ -1,11 +1,11 @@
-id = "simdref-lsp"
-name = "simdref"
-description = "SIMD instruction reference as LSP inlay hints for Assembly, C, and C++."
-version = "0.1.1"
+id = "asm-intrinsics-lsp"
+name = "Asm & Intrinsics Reference"
+description = "Shows what each assembly instruction and SIMD intrinsic does: a one-line summary at the end of the line, the full reference on hover. Assembly, C, and C++."
+version = "0.1.2"
 schema_version = 1
 authors = ["Marco Barbone <mbarbone@flatironinstitute.org>"]
 license = "GPL-3.0-or-later"
-repository = "https://github.com/simd-labs/zed-simdref"
+repository = "https://github.com/simd-labs/zed-asm-intrinsics"
 
 # The extension runs uv and isa by absolute path inside its work dir. The
 # manifest cannot name that path, so command is "*" and the arguments are fixed.
@@ -19,7 +19,7 @@ capabilities = [
 ]
 
 [language_servers.simdref]
-name = "simdref"
+name = "Asm & Intrinsics Reference"
 languages = ["Assembly", "C", "C++"]
 
 [language_servers.simdref.language_ids]

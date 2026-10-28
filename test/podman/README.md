@@ -14,7 +14,7 @@ podman build -t zed-shot test/podman
 
 ```sh
 cargo build --release --target wasm32-wasip2
-cp target/wasm32-wasip2/release/zed_simdref.wasm extension.wasm
+cp target/wasm32-wasip2/release/zed_asm_intrinsics.wasm extension.wasm
 ```
 
 ## Install check
@@ -32,9 +32,9 @@ The script also copies `OUT.Zed.log` and `OUT.install.simdref.log`, the extensio
 The script prints this line on success and exits with 0:
 
 ```text
-starting language server process. binary path: .../extensions/work/simdref-lsp/bin/simdref-lsp
+starting language server process. binary path: .../extensions/work/asm-intrinsics-lsp/bin/simdref-lsp
 OK: all N new paths in $HOME outside the Zed data dir are on the Zed, mesa, fontconfig and asm-lsp allowlist
-.../extensions/work/simdref-lsp/home/.local/share/simdref
+.../extensions/work/asm-intrinsics-lsp/home/.local/share/simdref
 OK: isa update wrote the catalog dir inside the work dir
 ```
 
@@ -50,7 +50,7 @@ Set `EXT_DIR` to a directory with `extension.toml` and `extension.wasm` to test 
 sh test/podman/shot.sh WORKSPACE FILE OUT.png [DEV_EXT_DIR ...]
 ```
 
-`WORKSPACE` and `FILE` are host paths. `FILE` is below `WORKSPACE`. Each `DEV_EXT_DIR` holds `extension.toml` and `extension.wasm`. Its name must be the extension id, `simdref-lsp`.
+`WORKSPACE` and `FILE` are host paths. `FILE` is below `WORKSPACE`. Each `DEV_EXT_DIR` holds `extension.toml` and `extension.wasm`. Its name must be the extension id, `asm-intrinsics-lsp`.
 
 Environment settings:
 

@@ -10,15 +10,15 @@
 4. Clone the fork. In the clone, add the submodule:
 
    ```sh
-   git submodule add https://github.com/simd-labs/zed-simdref.git extensions/simdref-lsp
-   git -C extensions/simdref-lsp checkout v0.1.0
+   git submodule add https://github.com/simd-labs/zed-asm-intrinsics.git extensions/asm-intrinsics-lsp
+   git -C extensions/asm-intrinsics-lsp checkout v0.1.0
    ```
 
 5. Add the entry to `extensions.toml`, in alphabetical sequence:
 
    ```toml
-   [simdref-lsp]
-   submodule = "extensions/simdref-lsp"
+   [asm-intrinsics-lsp]
+   submodule = "extensions/asm-intrinsics-lsp"
    version = "0.1.0"
    ```
 
@@ -34,11 +34,11 @@ The full instructions: https://zed.dev/docs/extensions/publishing/publishing-gui
 2. In the extensions fork, update the submodule to the new tag:
 
    ```sh
-   git -C extensions/simdref-lsp fetch --tags
-   git -C extensions/simdref-lsp checkout v0.2.0
+   git -C extensions/asm-intrinsics-lsp fetch --tags
+   git -C extensions/asm-intrinsics-lsp checkout v0.2.0
    ```
 
-3. Increase the `version` in the `[simdref-lsp]` block of `extensions.toml`.
+3. Increase the `version` in the `[asm-intrinsics-lsp]` block of `extensions.toml`.
 4. Run `pnpm test`. Commit, push, open a PR.
 
 The update instructions: https://zed.dev/docs/extensions/publishing/updating-and-maintenance

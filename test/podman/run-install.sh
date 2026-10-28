@@ -4,7 +4,7 @@
 # on PATH, network on. The extension downloads uv, runs "uv tool install
 # simdref", then "isa update". Needs extension.wasm in the repo root:
 #   cargo build --release --target wasm32-wasip2
-#   cp target/wasm32-wasip2/release/zed_simdref.wasm extension.wasm
+#   cp target/wasm32-wasip2/release/zed_asm_intrinsics.wasm extension.wasm
 # Exit 0 if Zed.log shows the language server starting from the work dir, the
 # catalog is in the work dir, and every new path in $HOME outside the Zed data
 # dir is on the allowlist below.
