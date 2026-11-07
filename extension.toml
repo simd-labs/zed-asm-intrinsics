@@ -1,7 +1,7 @@
 id = "asm-intrinsics-lsp"
 name = "Asm & Intrinsics Reference"
-description = "Shows what each assembly instruction and SIMD intrinsic does: a one-line summary at the end of the line, the full reference on hover. Assembly, C, and C++."
-version = "0.1.2"
+description = "Shows what assembly instructions and SIMD intrinsics do: a one-line summary after each assembly and inline asm line, the full reference on hover. Assembly, C, and C++."
+version = "0.1.3"
 schema_version = 1
 authors = ["Marco Barbone <mbarbone@flatironinstitute.org>"]
 license = "GPL-3.0-or-later"

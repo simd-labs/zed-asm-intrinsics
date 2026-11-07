@@ -3,7 +3,7 @@
 ![simdref inlay hints in a .s file in Zed](https://raw.githubusercontent.com/simd-labs/zed-asm-intrinsics/10bd4108dda9af9356ba802050a88a032f6f806f/zed-asm.png)
 ![simdref inlay hints in a .cpp file in Zed](https://raw.githubusercontent.com/simd-labs/zed-asm-intrinsics/10bd4108dda9af9356ba802050a88a032f6f806f/zed-cpp.png)
 
-A Zed extension, ID `asm-intrinsics-lsp`, that starts `simdref-lsp` for Assembly, C, and C++ buffers. The server shows a one-line summary of each assembly instruction and SIMD intrinsic at the end of the line. Hover on an instruction or intrinsic to show the full simdref page from the local catalog, with no network.
+A Zed extension, ID `asm-intrinsics-lsp`, that starts `simdref-lsp` for Assembly, C, and C++ buffers. The server shows a one-line summary at the end of each assembly line, in `.s` files and in inline `asm(...)` strings in C and C++. Hover on an instruction or SIMD intrinsic to show the full simdref page from the local catalog, with no network.
 
 To get hints in `.s` files, install the Zed `assembly` extension.
 
