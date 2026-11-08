@@ -14,6 +14,52 @@ const ERR_HINT: &str = "simdref not found. Install it: uv tool install simdref (
 /// Pinned uv release. Bump UV_TAG to move to a newer uv.
 const UV_TAG: &str = "0.12.23";
 
+/// Pinned sha256 of each uv 0.12.23 release asset, lowercase hex. Change a
+/// value with UV_TAG, from https://github.com/astral-sh/uv/releases/download/0.12.23/<asset>.sha256.
+/// i686 on macOS has no uv release asset, so it has no pin.
+fn uv_sha256(os: Os, arch: Architecture) -> Option<&'static str> {
+    let (os, arch) = (
+        match os {
+            Os::Mac => "apple-darwin",
+            Os::Linux => "unknown-linux-gnu",
+            Os::Windows => "pc-windows-msvc",
+        },
+        match arch {
+            Architecture::Aarch64 => "aarch64",
+            Architecture::X86 => "i686",
+            Architecture::X8664 => "x86_64",
+        },
+    );
+    match (os, arch) {
+        ("apple-darwin", "aarch64") => {
+            Some("50487ae565ccd96e499056b4674d438f4c53170202617b4c759defe0c6a1b544")
+        }
+        ("apple-darwin", "x86_64") => {
+            Some("960da44cb4b73685206ddd250b19e0a117fa41095710c1038f081f5cb613efb4")
+        }
+        ("unknown-linux-gnu", "aarch64") => {
+            Some("6524bd338177ed50d035d39354e12545e993bbeba2ecbddf0480c5b3a81d313f")
+        }
+        ("unknown-linux-gnu", "i686") => {
+            Some("52c93c40f6056c4d0e1e259acd60c11f7328416a4f28c85e5f1b04430538aeaa")
+        }
+        ("unknown-linux-gnu", "x86_64") => {
+            Some("9167d72b3319674b6303c4cbe071854bba13ebdf3d76b1a7cbdc175471fb66d6")
+        }
+        ("pc-windows-msvc", "aarch64") => {
+            Some("13294e232ececbe709c06b74e6ced06f2a225ea5591476685362f22be56a50d5")
+        }
+        ("pc-windows-msvc", "i686") => {
+            Some("22a92f4374e4716c2848acaa0392f2f8e4a13b0ff65d080e2a5ade167bce96a8")
+        }
+        ("pc-windows-msvc", "x86_64") => {
+            Some("75d05de6762778c31ee183398de7dd15093fad0ed90b1f236d8205ea5ec00c90")
+        }
+        ("apple-darwin", "i686") => None,
+        _ => unreachable!(),
+    }
+}
+
 struct AsmIntrinsics;
 
 /// True when a regular file or a symlink exists at `path`. The WASI sandbox
@@ -22,6 +68,27 @@ struct AsmIntrinsics;
 /// binary natively where the link resolves fine.
 fn is_file(path: &Path) -> bool {
     fs::symlink_metadata(path).is_ok_and(|m| m.is_file() || m.file_type().is_symlink())
+}
+
+/// Returns the first file named `name` in a directory of the PATH string
+/// `path_var`. On Windows the file name has the .exe suffix.
+fn find_on_path(path_var: &str, name: &str) -> Option<PathBuf> {
+    let name = if cfg!(windows) { format!("{name}.exe") } else { name.to_string() };
+    path_var
+        .split(if cfg!(windows) { ';' } else { ':' })
+        .filter(|dir| !dir.is_empty())
+        .filter_map(|dir| {
+            let p = Path::new(dir).join(&name);
+            is_file(&p).then_some(p)
+        })
+        .next()
+}
+
+/// Returns the system tar path. When no PATH directory holds it, the error
+/// names tar, so the user sees the missing binary before the spawn.
+fn tar_on_path() -> Result<PathBuf> {
+    let path_var = env::var("PATH").unwrap_or_default();
+    find_on_path(&path_var, "tar").ok_or_else(|| "tar not found on PATH".to_string())
 }
 
 /// Release asset stem and archive suffix of uv for a platform.
@@ -98,21 +165,26 @@ fn ensure_uv(id: &LanguageServerId, work: &Path) -> Result<PathBuf> {
     let name = format!("{stem}.{suffix}");
     let url =
         format!("https://github.com/astral-sh/uv/releases/download/{UV_TAG}/{name}");
+    // The code checks the archive sha256 against the pin in code, not the
+    // release sidecar.
+    let want = match uv_sha256(os, arch) {
+        Some(h) => h,
+        None => return Err(format!("no pinned uv sha256 for {name}")),
+    };
     set_status(id, &Status::Downloading);
     // Record the pinned download in install.log. zed::download_file is a host
-    // call, so `run` never sees it.
-    let record = format!("download: {url}\nsha256: {url}.sha256\n---\n");
+    // call, so `run` does not see it.
+    let record = format!("download: {url}\nsha256: {want}\n---\n");
     fs::OpenOptions::new()
         .create(true)
         .append(true)
         .open(work.join("install.log"))
         .and_then(|mut f| std::io::Write::write_all(&mut f, record.as_bytes()))
         .ok();
-    let result = download_extract(&url, &name, work)
+    let result = download_extract(&url, &name, work, want)
         .map_err(|cause| format!("failed to download {name}: {cause}"));
     if result.is_err() {
         fs::remove_file(work.join(&name)).ok();
-        fs::remove_file(work.join(format!("{name}.sha256"))).ok();
         fs::remove_dir_all(work.join("uv")).ok();
     }
     result?;
@@ -123,20 +195,12 @@ fn ensure_uv(id: &LanguageServerId, work: &Path) -> Result<PathBuf> {
     }
 }
 
-/// Downloads `url`, checks the SHA-256 of the bytes against `<url>.sha256`,
-/// then extracts the verified archive with the system `tar` into `work/uv`.
-fn download_extract(url: &str, name: &str, work: &Path) -> Result<()> {
-    zed::download_file(
-        &format!("{url}.sha256"),
-        &format!("{name}.sha256"),
-        DownloadedFileType::Uncompressed,
-    )?;
-    let digest = fs::read_to_string(work.join(format!("{name}.sha256")))
-        .map_err(|e| format!("cannot read {name}.sha256: {e}"))?;
-    let want = digest.split_whitespace().next().unwrap_or("").to_string();
+/// Downloads `url` and checks its SHA-256 against the pinned value. Then the
+/// system `tar` opens the archive into `work/uv`.
+fn download_extract(url: &str, name: &str, work: &Path, want: &str) -> Result<()> {
     zed::download_file(url, name, DownloadedFileType::Uncompressed)?;
     let bytes = fs::read(work.join(name)).map_err(|e| format!("cannot read {name}: {e}"))?;
-    compare(&hex(&Sha256::digest(&bytes)), &want)?;
+    compare(&hex(&Sha256::digest(&bytes)), want)?;
     fs::create_dir_all(work.join("uv")).map_err(|e| e.to_string())?;
     // Windows 10+ ships bsdtar, which also reads .zip archives. Zed runs
     // process:exec outside the work dir, so both paths are absolute and no
@@ -144,8 +208,9 @@ fn download_extract(url: &str, name: &str, work: &Path) -> Result<()> {
     // The capability args must match this call exactly: ["-xf", ARCHIVE, "-C", DIR].
     let dir = work.join("uv");
     let archive = work.join(name);
+    let tar = tar_on_path()?;
     run(
-        Path::new("tar"),
+        &tar,
         &["-xf", &*archive.to_string_lossy(), "-C", &*dir.to_string_lossy()],
         &[],
     )?;
@@ -210,8 +275,14 @@ fn install(id: &LanguageServerId) -> Result<PathBuf> {
         .iter()
         .map(|(k, v)| (k.as_str(), v.as_str()))
         .collect();
+    let isa = bin.join(exe("isa"));
     let result = run(&uv, &["tool", "install", "simdref"], &env)
-        .and_then(|()| run(&bin.join(exe("isa")), &["update"], &env))
+        .and_then(|()| {
+            if !is_file(&isa) {
+                return Err(format!("{} missing after install", isa.display()));
+            }
+            run(&isa, &["update"], &env)
+        })
         .and_then(|()| {
             if is_file(&lsp) {
                 Ok(())
@@ -369,6 +440,32 @@ mod tests {
     }
 
     #[test]
+    fn uv_sha256_pins_every_platform_with_a_uv_release_asset() {
+        // uv 0.12.23 ships an asset for these eight (os, arch) pairs.
+        // i686 on macOS has no asset, so it has no pin.
+        for (os, arch) in [
+            (Os::Mac, Architecture::Aarch64),
+            (Os::Mac, Architecture::X8664),
+            (Os::Linux, Architecture::Aarch64),
+            (Os::Linux, Architecture::X86),
+            (Os::Linux, Architecture::X8664),
+            (Os::Windows, Architecture::Aarch64),
+            (Os::Windows, Architecture::X86),
+            (Os::Windows, Architecture::X8664),
+        ] {
+            let h = uv_sha256(os, arch).unwrap_or_else(|| panic!("{os:?} {arch:?}"));
+            assert_eq!(h.len(), 64, "{os:?} {arch:?}");
+            assert!(h.chars().all(|c| c.is_ascii_hexdigit()), "{os:?} {arch:?}");
+        }
+        // A known pin catches an edit to the table, not a format error.
+        assert_eq!(
+            uv_sha256(Os::Linux, Architecture::X8664),
+            Some("9167d72b3319674b6303c4cbe071854bba13ebdf3d76b1a7cbdc175471fb66d6")
+        );
+        assert!(uv_sha256(Os::Mac, Architecture::X86).is_none());
+    }
+
+    #[test]
     fn uv_path_matches_the_archive_layout() {
         let work = Path::new("/work");
         // The tar.gz nests uv-TRIPLE/uv.
@@ -459,6 +556,21 @@ mod tests {
             outcome(p)
         };
         (work, isa, uv, log, run)
+    }
+
+    #[test]
+    fn find_on_path_is_missing_when_no_path_dir_has_the_file() {
+        // A missing binary must fail the check before the spawn.
+        let dir = env::temp_dir().join(format!("simdref-find-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(dir.join("tar"), b"#!/bin/sh\n").unwrap();
+        assert!(find_on_path("/no-such-dir", "tar").is_none());
+        assert_eq!(
+            find_on_path(&dir.to_string_lossy(), "tar"),
+            Some(dir.join("tar"))
+        );
+        fs::remove_dir_all(&dir).ok();
     }
 
     #[test]

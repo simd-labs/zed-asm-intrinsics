@@ -45,7 +45,7 @@ podman run --rm -i \
   $VOLUMES \
   -e ZED_ALLOW_ROOT=1 \
   "$IMG" \
-  sh /rig/in-container.sh "$FILECONT" "${WAIT_SECS:-12}" /rig/settings.json || rc=$?
+  sh /rig/in-container.sh shot "${WAIT_SECS:-12}" /rig/settings.json "$FILECONT" || rc=$?
 
 BASE="${OUTHOST%.png}"
 cp "$OUTDIR/shot.png" "$OUTHOST" 2>/dev/null || true

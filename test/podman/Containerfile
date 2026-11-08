@@ -16,6 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # uv
 RUN curl -fsSL https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh
 
+# Python for the screenshot helpers: wayland pointer, PNG diffing.
+RUN pip3 install --break-system-packages wayland-automation pillow
+
 # Zed tarball
 RUN curl -fSL -o /tmp/zed.tar.gz \
       https://zed.dev/api/releases/stable/latest/zed-linux-x86_64.tar.gz \

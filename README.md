@@ -1,11 +1,15 @@
 # Asm & Intrinsics Reference
 
-![simdref inlay hints in a .s file in Zed](https://raw.githubusercontent.com/simd-labs/zed-asm-intrinsics/10bd4108dda9af9356ba802050a88a032f6f806f/zed-asm.png)
-![simdref inlay hints in a .cpp file in Zed](https://raw.githubusercontent.com/simd-labs/zed-asm-intrinsics/10bd4108dda9af9356ba802050a88a032f6f806f/zed-cpp.png)
+![simdref inlay hints in a .s file in Zed](https://raw.githubusercontent.com/simd-labs/zed-asm-intrinsics/afb6f9caa3602fc7950810708675a108ab89d004/zed-asm.png)
+![simdref instruction hover in a .s file in Zed](https://raw.githubusercontent.com/simd-labs/zed-asm-intrinsics/afb6f9caa3602fc7950810708675a108ab89d004/zed-asm-hover.png)
+![simdref inlay hints in a .cpp file in Zed](https://raw.githubusercontent.com/simd-labs/zed-asm-intrinsics/afb6f9caa3602fc7950810708675a108ab89d004/zed-cpp.png)
+![simdref instruction hover in a .cpp file in Zed](https://raw.githubusercontent.com/simd-labs/zed-asm-intrinsics/afb6f9caa3602fc7950810708675a108ab89d004/zed-cpp-hover.png)
 
 A Zed extension, ID `asm-intrinsics-lsp`, that starts `simdref-lsp` for Assembly, C, and C++ buffers. The server shows a one-line summary at the end of each assembly line, in `.s` files and in inline `asm(...)` strings in C and C++. Hover on an instruction or SIMD intrinsic to show the full simdref page from the local catalog, with no network.
 
 To get hints in `.s` files, install the Zed `assembly` extension.
+
+Zed has no CUDA or NASM language, so `.nasm` files get no hints. `.cu` and `.cuh` files open as C++, so inline `asm(...)` in them gets the C++ hints.
 
 ## Install
 
@@ -19,13 +23,19 @@ Zed must have this setting in `settings.json`:
 
 The extension installs the newest simdref.
 
+## Settings
+
+The extension has no settings of its own. Zed must have `inlay_hints.enabled` set to `true` for the hints to show. Zed has no inlay-hint length cap, so the full one-line summary shows.
+
 ## Auto-update
 
 The extension upgrades the simdref copy it installed once a day. The daily check runs at language-server start. It takes about 0.4 s, and about 14 s on the day a new simdref version downloads its catalog. A stalled download can stretch that to about 8 minutes: uv retries each HTTP read, each read can take up to 120 s (UV_HTTP_TIMEOUT), and simdref's catalog download gives up after 120 s.
 
+A new simdref version takes effect at the next server start. Run the `editor: restart language server` command to start the new version sooner.
+
 ## Auto-install
 
-The extension looks for `simdref-lsp` on the `PATH` first. If it finds none, it downloads the `uv` release from `astral-sh/uv` and checks it against the `.sha256` file from that release. It then installs simdref and its catalog. The first start downloads the catalog, 589 MB for the data-v0.0.13 release. All files stay in the extension work directory of Zed.
+The extension looks for `simdref-lsp` on the `PATH` first. If it finds none, it downloads the `uv` release from `astral-sh/uv` and checks it against the sha256 pin in the code. It then installs simdref and its catalog. The first start downloads the catalog, 589 MB for the data-v0.0.13 release. All files stay in the extension work directory of Zed.
 
 ## Manual install
 
