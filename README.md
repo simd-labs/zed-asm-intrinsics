@@ -5,11 +5,11 @@
 ![simdref inlay hints in a .cpp file in Zed](https://raw.githubusercontent.com/simd-labs/zed-asm-intrinsics/afb6f9caa3602fc7950810708675a108ab89d004/zed-cpp.png)
 ![simdref instruction hover in a .cpp file in Zed](https://raw.githubusercontent.com/simd-labs/zed-asm-intrinsics/afb6f9caa3602fc7950810708675a108ab89d004/zed-cpp-hover.png)
 
-A Zed extension, ID `asm-intrinsics-lsp`, that starts `simdref-lsp` for Assembly, C, and C++ buffers. The server shows a one-line summary at the end of each assembly line, in `.s` files and in inline `asm(...)` strings in C and C++. Hover on an instruction or SIMD intrinsic to show the full simdref page from the local catalog, with no network.
+A Zed extension, ID `asm-intrinsics-lsp`, that starts `simdref-lsp` for Assembly, PTX, C, and C++ buffers. The server shows a one-line summary at the end of each assembly line. This summary shows in `.s` and `.ptx` files and in inline `asm(...)` strings in C and C++. Hover on an instruction or SIMD intrinsic to show the full simdref page from the local catalog, with no network.
 
-To get hints in `.s` files, install the Zed `assembly` extension.
+To get hints in `.s` files, install the Zed `assembly` extension. The extension registers a PTX language for `.ptx` files.
 
-Zed has no CUDA or NASM language, so `.nasm` files get no hints. `.cu` and `.cuh` files open as C++, so inline `asm(...)` in them gets the C++ hints.
+Zed has no CUDA or NASM language, so `.nasm` files get no hints. `.cu` and `.cuh` files open as C++. Inline `asm(...)` in them gets hints, PTX included.
 
 ## Install
 

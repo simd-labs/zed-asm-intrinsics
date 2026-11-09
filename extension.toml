@@ -1,6 +1,6 @@
 id = "asm-intrinsics-lsp"
 name = "Asm & Intrinsics Reference"
-description = "Shows what assembly instructions and SIMD intrinsics do: a one-line summary after each assembly and inline asm line, the full reference on hover. Assembly, C, and C++."
+description = "Shows what assembly instructions and SIMD intrinsics do: a one-line summary after each assembly and inline asm line, the full reference on hover. Assembly, PTX, C, and C++."
 version = "0.1.3"
 schema_version = 1
 authors = ["Marco Barbone <mbarbone@flatironinstitute.org>"]
@@ -20,9 +20,10 @@ capabilities = [
 
 [language_servers.simdref]
 name = "Asm & Intrinsics Reference"
-languages = ["Assembly", "C", "C++"]
+languages = ["Assembly", "PTX", "C", "C++"]
 
 [language_servers.simdref.language_ids]
 "Assembly" = "asm"
+"PTX" = "ptx"
 "C" = "c"
 "C++" = "cpp"

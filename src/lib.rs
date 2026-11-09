@@ -615,4 +615,18 @@ mod tests {
         assert!(work.join(today_marker_name()).exists());
         fs::remove_dir_all(&work).ok();
     }
+
+    #[test]
+    fn ptx_language_registers_the_ptx_suffix_without_a_grammar() {
+        // simdref-lsp treats a `.ptx` URI or a `ptx` languageId as a PTX
+        // document. The extension registers the suffix and the id with no
+        // grammar: Zed accepts a language config without one.
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+        let manifest = fs::read_to_string(root.join("extension.toml")).unwrap();
+        assert!(manifest.contains("languages = [\"Assembly\", \"PTX\", \"C\", \"C++\"]"));
+        assert!(manifest.contains("\"PTX\" = \"ptx\""));
+        let config = fs::read_to_string(root.join("languages/ptx/config.toml")).unwrap();
+        assert!(config.contains("path_suffixes = [\"ptx\"]"));
+        assert!(!config.contains("grammar"));
+    }
 }
